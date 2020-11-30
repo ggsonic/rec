@@ -7,7 +7,8 @@ class DCN(tfrs.Model):
   def __init__(self, deep_layer_sizes,vocab, projection_dim=None):
     super().__init__()
 
-    self.embedding_dimension = 32
+    #self.embedding_dimension = 32
+    self.embedding_dimension = 30
 
     str_features = ["movie_id", "user_id", "user_zip_code",
                     "user_occupation_text"]
@@ -37,9 +38,10 @@ class DCN(tfrs.Model):
                                      self.embedding_dimension)
     ])
 
-    self._cross_layer = tfrs.layers.dcn.Cross(
-          projection_dim=projection_dim,
-          kernel_initializer="glorot_uniform")
+    self._cross_layer0 = tfrs.layers.dcn.Cross( projection_dim=projection_dim, kernel_initializer="glorot_uniform")
+    self._cross_layer1 = tfrs.layers.dcn.Cross( projection_dim=projection_dim, kernel_initializer="glorot_uniform")
+    self._cross_layer2 = tfrs.layers.dcn.Cross( projection_dim=projection_dim, kernel_initializer="glorot_uniform")
+    self._cross_layer3 = tfrs.layers.dcn.Cross( projection_dim=projection_dim, kernel_initializer="glorot_uniform")
 
     self._deep_layers = [tf.keras.layers.Dense(layer_size, activation="relu")
       for layer_size in deep_layer_sizes]
@@ -60,10 +62,14 @@ class DCN(tfrs.Model):
       embeddings.append(embedding_fn(features[feature_name]))
 
     #print(embeddings)
-    x = tf.concat(embeddings, axis=1)
+    x0 = tf.concat(embeddings, axis=1)
+    
 
     # Build Cross Network
-    x = self._cross_layer(x)
+    x = self._cross_layer0(x0,x0)
+    x = self._cross_layer1(x0,x)
+    x = self._cross_layer2(x0,x)
+    x = self._cross_layer3(x0,x)
 
     # Build Deep Network
     for deep_layer in self._deep_layers:
